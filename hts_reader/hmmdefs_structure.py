@@ -2,6 +2,7 @@
 #
 # @author W.J. Maaskant
 from collections import OrderedDict
+import copy
 
 class HtkModelError(Exception):
     pass
@@ -182,6 +183,11 @@ class Covariance:
         self.var = None  # Var
         self.inv = None  # STriMat
 
+    def copy(self):
+        a = Covariance()
+        a.var = self.var.copy()
+        return a
+
 
 class MixPdf:
     def __init__(self):
@@ -199,16 +205,36 @@ class MixPdf:
                       self.vFloor, self.info, self.hook)
         pass
 
+    def copy(self):
+        a = MixPdf()
+        a.mean = copy.deepcopy(self.mean)
+        a.ckind = self.ckind
+        a.cov = self.cov.copy()
+        a.gConst = self.gConst
+        a.mIdx = self.mIdx
+        a.stream = self.stream
+        a.vFloor = self.vFloor
+        a.info = self.info
+        a.hook = self.hook
+        return a
+
     def to_string(self):
         string = []
-        string.append("<MEAN> " + str(len(self.mean)))
-        if len(self.mean) > 0:
-            string.append(' %s' % (' '.join(['{:.6e}'.format(f) for f in self.mean])))
+        if len(self.mean) == 1 and self.mean[0] == 0:
+            string.append("<MEAN> 0")
+        else:
+            string.append("<MEAN> " + str(len(self.mean)))
+            if len(self.mean) > 0:
+                string.append(' %s' % (' '.join(['{:.6e}'.format(f) for f in self.mean])))
 
-        string.append("<VARIANCE> " + str(self.cov.var.vec_size))
-        if self.cov.var.vec_size > 0:
-            string.append(' %s' % (' '.join(['{:.6e}'.format(f) for f in self.cov.var.vector])))
+        if len(self.cov.var.vector) == 1 and self.cov.var.vector[0] == 0:
+            string.append("<VARIANCE> 0")
+        else:
+            string.append("<VARIANCE> " + str(self.cov.var.vec_size))
+            if self.cov.var.vec_size > 0:
+                string.append(' %s' % (' '.join(['{:.6e}'.format(f) for f in self.cov.var.vector])))
 
+        # string.append("<GCONST> %s" % '{:.6e}'.format(self.gConst))
         return "\n".join(string)
 
 
@@ -218,9 +244,15 @@ class MixtureElem:
         self.mpdf = None  # MixPdf
         pass
 
+    def copy(self):
+        a = MixtureElem()
+        a.weight = self.weight
+        a.mpdf = self.mpdf.copy()
+        return a
+
     def to_string(self):
         string = []
-        string.append(str(self.weight))
+        string.append('{:.6e}'.format(self.weight))
         string.append(self.mpdf.to_string())
         if "" in string:
             string.remove("")
@@ -235,6 +267,11 @@ class MixtureVector:
         # so the first value will be always None
         self.dpdf = [None, None, None, None, None, None, None]  # ShortVec in Hmodel.h
         pass
+
+    def copy(self):
+        a = MixtureVector()
+        a.cpdf = [c.copy() if c else None for c in self.cpdf]
+        return a
 
     def to_string(self):
         string = []
@@ -262,6 +299,15 @@ class StreamInfo:
         self.spdf = MixtureVector()
         self.n_use = 0
         self.name = ""
+
+    def copy(self):
+        a = StreamInfo()
+        a.stream = self.stream
+        a.nMix = self.nMix
+        a.spdf = self.spdf.copy()
+        a.n_use = self.n_use
+        a.name = self.name
+        return a
 
     def SetName(self, name):
         self.name = name
@@ -293,10 +339,17 @@ class StreamInfo:
 
 
 class StreamElem:
+
     def __init__(self):
         self.info = StreamInfo()
         self.n_use = 1
         pass
+
+    def copy(self):
+        a = StreamElem()
+        a.n_use = self.n_use
+        a.info = self.info.copy()
+        return a
 
     def to_string(self):
         return self.info.to_string()
@@ -315,6 +368,17 @@ class StateInfo:
         self.name = ""
         self.dur = None
         self.n_use = 0
+
+    def copy(self):
+        a = StateInfo()
+        if isinstance(self.weights, list):
+            a.weights = copy.deepcopy(self.weights)
+        else:
+            a.weights = self.weights.copy()
+        a.pdf = [c.copy() if c else None for c in self.pdf]
+        a.name = self.name
+        a.n_use = self.n_use
+        return a
 
     def WriteName(self):
         return "~s" + ' "' + self.name + '"'
@@ -372,218 +436,6 @@ class StateInfo:
 
         return "\n".join(string)
 
-    def GetStreamSize(self):
-        return len(self.obj)
-    def SetName(self,name) :
-        self.name = name
-    def SetPdf(self,pdf):
-        if not isinstance(pdf,StreamPdf):
-            raise Exception("input param is not StreamPdf. got"+type(pdf).__name__)
-        if self.obj is None:
-            self.obj = []
-        else:
-            self.obj.append(pdf)
-    def GetName(self):
-        return self.name
-    def GetPdfName(self):
-        return self.name
-    def GetStream(self,stream_id):
-        for stream in self.obj:
-            if stream.GetId() == stream_id:
-                return stream
-        raise Exception("can not get pdf for stream",stream_id)
-    def _verify(self):
-        if self.obj is None:
-            print "State_pdf", self.name, "has None obj"
-            exit(1)
-
-        for stream_pdf in self.obj:
-            if stream_pdf is None:
-                print "StreamPdf in statepdf",self.name,"is None type"
-    def GetStreamPdfs(self):
-        return self.obj
-    def GetPdfs(self):
-        pdfs = OrderedDict()
-        for stream_pdf in self.obj:
-            pdfs[stream_pdf.GetId()] = stream_pdf.GetPdfs()
-        return pdfs
-    def copy(self):
-        spdf = StatePdf(self.obj, self.shared)
-        spdf.SetName(self.name)
-        return spdf
-
-
-class StreamPdf:
-    # obj can be Mixture or singel gaussian pdf
-    def __init__(self,sid,obj,num_mix=0, shared=False):
-        self.sid = sid
-        self.obj = obj
-        self.name = ""
-        self.type = "p" # Shared Stream or Shared State
-        self.shared=False
-        if isinstance(self.obj,list):
-            self.num_mix = len(self.obj)
-        self.num_mix = 0
-    def GetId(self):
-        return self.sid
-    def GetPdfs(self):
-        return self.obj
-    def GetPdfName(self):
-        return self.name
-    def SetName(self,name):
-        self.name = name
-    def copy(self):
-        spdf = StreamPdf(self.sid, self.obj, self.num_mix, self.shared)
-        spdf.SetName(self.name)
-        return spdf
-    def display(self, **kwargs):
-        """ Return the StatePdf in text format
-            E.g:
-            >>> StatePdf.display(out_info=["name", "content"])
-        """
-        out_info = []
-        if not kwargs:
-            out_info = ["name", "content"]
-        else:
-            out_info = kwargs["stream_info"]
-
-        string = []
-        if "name_cmp" in out_info:
-            string.append("<STREAM> %d" % self.sid)
-            if self.name:
-                string.append("~" + self.type + ' "' + self.name + '"')
-
-        if "name" in out_info:
-            if self.name:
-                string.append("~" + self.type + ' "' + self.name + '"')
-            string.append("<STREAM> %d" % self.sid)
-
-        for info in out_info:
-            if info == "content":
-                if isinstance(self.obj, list):
-                    string.append("<NUMMIXES> %s" % (str(len(self.obj))))
-                    for mix in self.obj:
-                        string.append(mix.display())
-                else:
-                    string.append(self.obj.display())
-
-        return "\n".join(string)
-
-
-class Mixture:
-    def __init__(self,mix_id,weight,pdf):
-        self.mix_id = mix_id
-        self.pdf = pdf
-        self.weight = weight
-    def _verify(self):
-        if self.mix_id is None:
-            print "Mixture has no mix_id"
-            exit(1)
-        if self.pdf is None:
-            print "Mixture id",self.mix_id,"has None type pdf"
-            exit(1)
-        if self.weight is None:
-            print "Mixture id",self.mix_id,"has None weight"
-            exit(1)
-
-    def GetId(self):
-        return self.mix_id
-    def GetWeight(self):
-        return self.weight
-    def GetPdf(self):
-        return self.pdf
-    def display(self,unt=None):
-        string = "%s %d %s\n"%("<MIXTURE>",self.mix_id,'{:.6e}'.format(self.weight))
-        string+= self.pdf.display()
-        return string
-
-
-class Pdf:
-    # @param mean An instance of Mean.
-    # @param var An instance of Var.
-    # gconst can be None
-    def __init__(self, mean, var,gconst):
-        if mean == None:
-            raise HtkModelError('Parameter mean is None.')
-        if var == None:
-            raise HtkModelError('Parameter var is None.')
-        self.mean = mean
-        self.var = var
-        self.gconst = gconst
-
-    def GetMean(self):
-        return self.mean
-
-    def GetVar(self):
-        return self.var
-
-    def GetGConst(self):
-        return self.gconst
-
-    def display(self,unt=None):
-        string = self.mean.display() + "\n"
-        if self.gconst:
-            string += self.var.display(display_name=False) + "\n"
-            string += '<GCONST> %s'%('{:.6e}'.format(self.gconst))
-        else:
-            string += self.var.display(display_name=False)
-        return string
-
-
-class State:
-    # obj can be a list of Stream containing  stream_pdf <StreamPdf> in case of cmp_hmm
-    # or Shared State Pdf in case of dur_hmm, weight can be None in case of dur_hmm
-    def __init__(self,weight=None, state_pdf=None,id=None):
-
-        self.weight = weight
-        # Sort the mixture list by mixture index.
-        #streams.sort(key=operator.itemgetter(0))
-        self.state_pdf = state_pdf
-        self.sid = id
-    def SetId(self,id):
-        self.sid = id
-    def SetPdf(self,pdf):
-        if not isinstance(pdf,StatePdf):
-            raise Exception("input param is not StatePdf, got "+pdf.GetName())
-        self.state_pdf = pdf
-    def SetPdfToStatePdf(self,pdf):
-        """
-        input is StreamPdf
-        """
-        self.state_pdf.SetPdf(pdf)
-    def _verify(self):
-        if self.weight is None:
-            print "state_id",self.sid,"has None type weight"
-            exit(1)
-        if self.state_pdf is None:
-            print "state_id",self.sid,"has None type pdf"
-            exit(1)
-        self.state_pdf._verify()
-    def GetStream(self,stream_id):
-        return self.state_pdf.GetStream(stream_id)
-    def GetStreamSize(self):
-        return self.state_pdf.GetStreamSize()
-    def GetId(self):
-        return self.sid
-    def GetStatePdf(self):
-        return self.state_pdf
-    def GetPdfs(self):  # Only being call if this state has StatePdf, if this state has list of StreamPdf, the function GetStream will be called
-        return self.state_pdf.GetPdfs()
-    def SetStreamWeights(self,sweight):
-        self.weight = sweight
-    def GetSWeight(self):
-        return self.weight
-    def GetStreams(self):
-        return self.streams
-
-    def display(self, **kwargs):
-        weight = ""
-        if self.weight:
-            weight = self.weight.display(True, display_name_only=True) + "\n"
-        string = weight
-        string += self.state_pdf.display(**kwargs)
-        return string
-
 
 class Tmat:
     # @param vector A list containing floats.
@@ -621,6 +473,14 @@ class Var:
         self.vec_size = 0
         self.name = ""
         self.n_use = 1
+
+    def copy(self):
+        a = Var()
+        a.vector = copy.deepcopy(self.vector)
+        a.vec_size = self.vec_size
+        a.name = self.name
+        a.n_use = self.n_use
+        return a
 
     def SetName(self, name):
         self.name = name

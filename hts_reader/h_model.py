@@ -579,7 +579,6 @@ class HMMSet():
         token = Token()
         self.GetToken(token)
         nstate = [None]
-        self.logger.debug("Loading all macros")
         while token.sym != EOFSYM:
             tok_type = token.macro_type
             if token.macro_type != "o":
