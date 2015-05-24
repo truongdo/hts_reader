@@ -607,7 +607,7 @@ class HMMSet():
                         structure = self.GetSweights(token)
                     if tok_type == 'p':
                         structure = self.GetStreamInfo(token, 0)
-                    structure.SetName(string)
+                    structure.name = string
                     self.structures[tok_type][string] = structure
             else:
                 self.GetOptions(token, nstate)
