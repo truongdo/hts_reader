@@ -1,6 +1,5 @@
 # This file contains classes to represent the HTK model structure.
 #
-# @author W.J. Maaskant
 from collections import OrderedDict
 import copy
 
