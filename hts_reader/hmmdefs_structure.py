@@ -471,7 +471,7 @@ class Tmat:
         a.matrix = copy.deepcopy(self.matrix)
         a.msize = self.msize
         a.name = self.name
-        a.n_use = self.nuse
+        a.n_use = self.n_use
         return a
 
     def WriteName(self):
