@@ -694,7 +694,7 @@ class HMMSet():
                     text.append(s.to_string())
 
             # Print out HMM info
-            for name, s in self.structures['h'].items():
+            for name, s in sorted(self.structures['h'].items()):
                 text.append(s.to_string())
 
         if "" in text:
