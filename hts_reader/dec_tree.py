@@ -74,4 +74,7 @@ class DecisionTree:
         assert sid is not None
         assert stid is not None
         #answer = get_answer(ctx, self.qs_list[type])
-        return self.trees[(sid, stid)].parse(ctx, self.qs_list[type])
+        if type == "dur":
+            return self.trees[(sid, -1)].parse(ctx, self.qs_list[type])
+        else:
+            return self.trees[(sid, stid)].parse(ctx, self.qs_list[type])
