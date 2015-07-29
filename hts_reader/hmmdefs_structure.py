@@ -152,6 +152,14 @@ class SWeights:
         self.name = ""
         self.n_use = 0
 
+    def copy(self):
+        a = SWeights()
+        a.size = self.size
+        a.vector = copy.deepcopy(self.vector)
+        a.name = self.name
+        a.n_use = self.n_use
+        return a
+
     def SetName(self, name):
         self.name = name
 
