@@ -54,6 +54,8 @@ class DecisionTree:
                         stid = int(stid)
                         self.trees[(state_id, stid)] = m
                 else:
+                    if stream_id == '':
+                        stream_id = "-1"
                     stream_id = int(stream_id)
                     self.trees[(state_id, stream_id)] = m
             else:
