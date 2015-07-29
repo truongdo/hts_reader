@@ -669,27 +669,27 @@ class HMMSet():
 
         else:
             # Print out TransP
-            for name, s in self.structures['t'].items():
+            for name, s in sorted(self.structures['t'].items()):
                 if s.n_use > 0:
                     text.append(s.to_string())
 
             # Print out SWeights
-            for name, s in self.structures['w'].items():
+            for name, s in sorted(self.structures['w'].items()):
                 if s.n_use > 0:
                     text.append(s.to_string())
 
             # Print out VarFloor
-            for name, s in self.structures['v'].items():
+            for name, s in sorted(self.structures['v'].items()):
                 if s.n_use > 0:
                     text.append(s.to_string())
 
             # Print out Shared StateInfo
-            for name, s in self.structures['p'].items():
+            for name, s in sorted(self.structures['p'].items()):
                 if s.n_use > 0:
                     text.append(s.to_string())
 
             # Print out Shared StateInfo
-            for name, s in self.structures['s'].items():
+            for name, s in sorted(self.structures['s'].items()):
                 if s.n_use > 0:
                     text.append(s.to_string())
 
