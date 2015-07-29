@@ -1,6 +1,5 @@
 # This file contains classes to represent the HTK model structure.
 #
-# @author W.J. Maaskant
 from collections import OrderedDict
 import copy
 
@@ -49,6 +48,15 @@ class Hmm:
         self.transP = None  # This
         self.dur = None
 
+    def copy(self):
+        a = Hmm()
+        a.numStates = self.numStates
+        a.hIdx = self.hIdx
+        a.svec = [x.copy() for x in self.svec]
+        a.name = self.name
+        a.transP = self.transP.copy()
+        return a
+
     def to_string(self):
         string = []
         string.append('~h ' + '"' + self.name + '"')
@@ -88,7 +96,6 @@ class Hmm:
             string.remove("")
         return "\n".join(string)
 
-
     def GetStateWithId(self,id):
         if self.states is None:
             raise Exception("self.states is None")
@@ -96,11 +103,14 @@ class Hmm:
             if state.GetId() == id:
                 return state
         return None
+
     def SetStreamWeights(self,sweight):
         for i in range(len(self.states)):
             self.states[i].SetStreamWeights(sweight)
+
     def GetStreamSize(self):
         return self.states[2].GetStreamSize()
+
     def GetPdfs(self,state_id,stream_id=None):
         state = None
         for sm in self.states:
@@ -118,6 +128,7 @@ class Hmm:
                 return None
             pdfs = stream.GetPdfs()
         return pdfs
+
     def GetAllPdfsOrdered(self):
         """Return all pdfs in ordered"""
         state = None
@@ -126,8 +137,10 @@ class Hmm:
             pdfs = state.GetPdfs()
             hmm_pdfs.append(pdfs)
         return hmm_pdfs
+
     def GetStates(self):
         return self.states
+
     def GetName(self):
         return self.name
 
@@ -444,6 +457,14 @@ class Tmat:
         self.msize = 0
         self.name = ""
         self.n_use = 0
+
+    def copy(self):
+        a = Tmat()
+        a.matrix = copy.deepcopy(self.matrix)
+        a.msize = self.msize
+        a.name = self.name
+        a.n_use = self.nuse
+        return a
 
     def WriteName(self):
         return '~t ' + '"' + self.name + '"'
