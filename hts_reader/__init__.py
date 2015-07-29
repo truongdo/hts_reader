@@ -10,4 +10,4 @@
 
 """
 
-all = ["py_log", "h_model", "hmmdefs_structure"]
+all = ["py_log", "h_model", "hmmdefs_structure", "dec_tree"]
