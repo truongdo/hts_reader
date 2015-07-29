@@ -52,7 +52,7 @@ class Hmm:
         a = Hmm()
         a.numStates = self.numStates
         a.hIdx = self.hIdx
-        a.svec = [x.copy() for x in self.svec]
+        a.svec = [x.copy() if x else None for x in self.svec]
         a.name = self.name
         a.transP = self.transP.copy()
         return a
