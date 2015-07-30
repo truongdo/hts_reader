@@ -31,35 +31,35 @@ class TestDecisionTree(unittest.TestCase):
 
 def run_test():
     tree = dec_tree.DecisionTree()
-    tree.load_tree("examples/trees/cmp/mgc.inf.untied", "mgc")
-    tree.load_tree("examples/trees/cmp/lf0.inf.untied", "lf0")
-    tree.load_tree("examples/trees/cmp/bap.inf.untied", "bap")
+    tree.load_tree("examples/en_maleus/trees/cmp/mgc.inf.untied", "mgc")
+    tree.load_tree("examples/en_maleus/trees/cmp/lf0.inf.untied", "lf0")
+    tree.load_tree("examples/en_maleus/trees/cmp/bap.inf.untied", "bap")
     #tree.load_tree("examples/trees/dur/dur.inf.untied", "dur")
 
-    data = open("/home/truong-d/tmp/hts_reader/examples/trees/test_input").read().split("--")
+    data = open("/home/truong-d/tmp/hts_reader/examples/en_maleus/test_input").read().split("--")
 
     for idx, txt in enumerate(data):
         if idx % 100 == 0:
             print "processed", idx, "/", len(data)
         parts = txt.strip().split("\n")
-        hmm = parts[0].replace("~h ", "").strip("\"\"").replace("/T:0", "").replace("/T:1", "")
+        #hmm = parts[0].replace("~h ", "").strip("\"\"").replace("/T:0", "").replace("/T:1", "")
+        hmm = parts[0].replace("~h ", "").strip("\"\"")
         pdfs = parts[1:]
 
         for stream_id, pdf_name in enumerate(pdfs):
             stream_id += 1
             pdf_name = pdf_name.strip().replace("~p ", "").strip("\"\"")
 
-            print hmm
-            answer_mgc = get_answer(hmm, tree.qs_list["mgc"])
-            answer_lf0 = get_answer(hmm, tree.qs_list["lf0"])
-            answer_bap = get_answer(hmm, tree.qs_list["bap"])
+            #answer_mgc = get_answer(hmm, tree.qs_list["mgc"])
+            #answer_lf0 = get_answer(hmm, tree.qs_list["lf0"])
+            #answer_bap = get_answer(hmm, tree.qs_list["bap"])
             if stream_id == 1:
-                parsed_pdf = tree.parse_has_answer(hmm, answer_mgc, 2, stream_id, "mgc")
+                parsed_pdf = tree.parse(hmm, 2, stream_id, "mgc")
             elif stream_id > 1 and stream_id < 5:
-                parsed_pdf = tree.parse_has_answer(hmm, answer_lf0, 2, stream_id, "lf0")
+                parsed_pdf = tree.parse(hmm, 2, stream_id, "lf0")
                 parsed_pdf += "-" + str(stream_id)
             else:
-                parsed_pdf = tree.parse_has_answer(hmm, answer_bap, 2, stream_id, "bap")
+                parsed_pdf = tree.parse(hmm, 2, stream_id, "bap")
 
             if parsed_pdf != pdf_name:
                 print parsed_pdf

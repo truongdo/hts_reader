@@ -13,6 +13,7 @@ from os.path import exists
 import logging
 import struct
 import sys
+import time
 import io
 from py_io import read_input
 
@@ -144,6 +145,9 @@ SYM_MAP = { "BEGINHMM": BEGINHMM, "USE": USEMAC,
             "": NULLSYM}
 
 
+quote_char = {'"': 1, '\'': 2}
+
+
 class HMMSet():
 
     """Docstring for HMMSet. """
@@ -165,7 +169,6 @@ class HMMSet():
 
         if not c:
             return EOFSYM
-        # c, = struct.unpack("<c", c)
         return c
 
     def read_string(self):
@@ -176,7 +179,7 @@ class HMMSet():
         while c.isspace():
             c = self.read_char()
 
-        if c in ['"', '\'']:
+        if c in quote_char:
             isquote = True
             quote_type = c
 
@@ -595,6 +598,7 @@ class HMMSet():
                     self.GetHMMDef(self.hmm_list[string], nstate, token)
                     self.hmm_list[string].name = string
                     self.structures['h'][string] = self.hmm_list[string]
+
                 else:  # Load shared model
                     self.GetToken(token)
                     if tok_type == 't':
@@ -745,7 +749,7 @@ class HMMSet():
                     self.hmm_list[line] = Hmm()
 
         if (not from_pipe) and (not from_stdin):
-                self.hmm_fd = open(fn_hmm, 'rb')
+                self.hmm_fd = io.BytesIO(open(fn_hmm, 'rb').read())
         elif from_pipe:
             self.hmm_fd = io.BytesIO(bytearray(read_input(fn_hmm)))
         elif from_stdin:
