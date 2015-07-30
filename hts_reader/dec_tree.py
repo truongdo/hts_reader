@@ -91,3 +91,22 @@ class DecisionTree:
             return self.trees[(sid, -1)].parse(ctx, self.qs_list[type])
         else:
             return self.trees[(sid, stid)].parse(ctx, self.qs_list[type])
+
+    def parse_has_answer(self, ctx, answer, sid=None, stid=None, type="mgc"):
+        """
+        Find model for ctx with state id and stream id
+        Args:
+        ===============================
+            ctx: full context label (str)
+            sid: state id (int)
+            stid: stream id (int)
+        """
+
+        assert sid is not None
+        assert stid is not None
+        answer = get_answer(ctx, self.qs_list[type])
+        if type == "dur":
+            #return self.trees[(sid, -1)].parse(ctx, self.qs_list[type])
+            return self.trees[(sid, -1)].parse_has_answer(ctx, answer)
+        else:
+            return self.trees[(sid, stid)].parse_has_answer(ctx, answer)

@@ -173,16 +173,7 @@ def get_answer(ctx, qslist):
 
         pat_list = question.patterns
         for pat in pat_list:
-            regex_pattern = pat.replace("*", ".*").replace("\\", "\\\\").replace("+", "\+").replace("^", "\^").replace('$', '\$').replace("|", "\|").replace("?", ".")
-
-            if not regex_tail.search(regex_pattern):
-                regex_pattern += "$"
-
-            if not regex_head.search(regex_pattern):
-                regex_pattern = "^" + regex_pattern
-
-            match = re.search(regex_pattern, ctx)
-            if match:
+            if match_pat(pat, ctx):
                 answer[qs_name] = True
 
     return answer
@@ -299,6 +290,29 @@ class Tree:
             if self.IsLeaf(no_node):
                 return no_node
             return self.parse(ctx, qs_list, self.id2node[no_node])
+
+    def parse_has_answer(self, ctx, answer, node=None):
+        if node is None:    # Start from root
+            node = self.root
+
+        #print "==============-----"
+        qs_name = node.GetPattern()
+
+        #answer = get_single_answer(ctx, qs_list[qs_name])
+        #print "ask", qs_name, qs_list[qs_name].patterns
+        #print ctx
+        #print "answer:", answer
+
+        if answer[qs_name]:  # if yes
+            yes_node = node.GetYesNode()
+            if self.IsLeaf(yes_node):
+                return yes_node
+            return self.parse_has_answer(ctx, answer, self.id2node[yes_node])
+        else:
+            no_node = node.GetNoNode()
+            if self.IsLeaf(no_node):
+                return no_node
+            return self.parse_has_answer(ctx, answer, self.id2node[no_node])
 
     def BuildTree(self):
         if self.nodes[0].GetId() != 0:

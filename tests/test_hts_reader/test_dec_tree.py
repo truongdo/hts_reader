@@ -11,6 +11,7 @@
 """
 import unittest
 from hts_reader import dec_tree
+from hts_reader.tree_structure import get_answer
 
 
 class TestDecisionTree(unittest.TestCase):
@@ -40,8 +41,6 @@ def run_test():
     for idx, txt in enumerate(data):
         if idx % 100 == 0:
             print "processed", idx, "/", len(data)
-        if idx == 1000:
-            exit()
         parts = txt.strip().split("\n")
         hmm = parts[0].replace("~h ", "").strip("\"\"").replace("/T:0", "").replace("/T:1", "")
         pdfs = parts[1:]
@@ -50,13 +49,17 @@ def run_test():
             stream_id += 1
             pdf_name = pdf_name.strip().replace("~p ", "").strip("\"\"")
 
+            print hmm
+            answer_mgc = get_answer(hmm, tree.qs_list["mgc"])
+            answer_lf0 = get_answer(hmm, tree.qs_list["lf0"])
+            answer_bap = get_answer(hmm, tree.qs_list["bap"])
             if stream_id == 1:
-                parsed_pdf = tree.parse(hmm, 2, stream_id, "mgc")
+                parsed_pdf = tree.parse_has_answer(hmm, answer_mgc, 2, stream_id, "mgc")
             elif stream_id > 1 and stream_id < 5:
-                parsed_pdf = tree.parse(hmm, 2, stream_id, "lf0")
+                parsed_pdf = tree.parse_has_answer(hmm, answer_lf0, 2, stream_id, "lf0")
                 parsed_pdf += "-" + str(stream_id)
             else:
-                parsed_pdf = tree.parse(hmm, 2, stream_id, "bap")
+                parsed_pdf = tree.parse_has_answer(hmm, answer_bap, 2, stream_id, "bap")
 
             if parsed_pdf != pdf_name:
                 print parsed_pdf
