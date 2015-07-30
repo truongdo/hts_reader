@@ -30,37 +30,39 @@ class TestDecisionTree(unittest.TestCase):
 
 def run_test():
     tree = dec_tree.DecisionTree()
-    #tree.load_tree("examples/trees/cmp/mgc.inf.untied", "mgc")
-    #tree.load_tree("examples/trees/cmp/lf0.inf.untied", "lf0")
-    #tree.load_tree("examples/trees/cmp/bap.inf.untied", "bap")
-    tree.load_tree("examples/trees/dur/dur.inf.untied", "dur")
+    tree.load_tree("examples/trees/cmp/mgc.inf.untied", "mgc")
+    tree.load_tree("examples/trees/cmp/lf0.inf.untied", "lf0")
+    tree.load_tree("examples/trees/cmp/bap.inf.untied", "bap")
+    #tree.load_tree("examples/trees/dur/dur.inf.untied", "dur")
 
-    #data = open("/home/truong-d/tmp/hts_reader/examples/trees/test_input").read().split("--")
+    data = open("/home/truong-d/tmp/hts_reader/examples/trees/test_input").read().split("--")
 
-    #for idx, txt in enumerate(data):
-        #if idx % 100 == 0:
-            #print "processed", idx, "/", len(data)
-        #parts = txt.strip().split("\n")
-        #hmm = parts[0].replace("~h ", "").strip("\"\"").replace("/T:0", "").replace("/T:1", "")
-        #pdfs = parts[1:]
+    for idx, txt in enumerate(data):
+        if idx % 100 == 0:
+            print "processed", idx, "/", len(data)
+        if idx == 1000:
+            exit()
+        parts = txt.strip().split("\n")
+        hmm = parts[0].replace("~h ", "").strip("\"\"").replace("/T:0", "").replace("/T:1", "")
+        pdfs = parts[1:]
 
-        #for stream_id, pdf_name in enumerate(pdfs):
-            #stream_id += 1
-            #pdf_name = pdf_name.strip().replace("~p ", "").strip("\"\"")
+        for stream_id, pdf_name in enumerate(pdfs):
+            stream_id += 1
+            pdf_name = pdf_name.strip().replace("~p ", "").strip("\"\"")
 
-            #if stream_id == 1:
-                #parsed_pdf = tree.parse(hmm, 2, stream_id, "mgc")
-            #elif stream_id > 1 and stream_id < 5:
-                #parsed_pdf = tree.parse(hmm, 2, stream_id, "lf0")
-                #parsed_pdf += "-" + str(stream_id)
-            #else:
-                #parsed_pdf = tree.parse(hmm, 2, stream_id, "bap")
+            if stream_id == 1:
+                parsed_pdf = tree.parse(hmm, 2, stream_id, "mgc")
+            elif stream_id > 1 and stream_id < 5:
+                parsed_pdf = tree.parse(hmm, 2, stream_id, "lf0")
+                parsed_pdf += "-" + str(stream_id)
+            else:
+                parsed_pdf = tree.parse(hmm, 2, stream_id, "bap")
 
-            #if parsed_pdf != pdf_name:
-                #print parsed_pdf
-                #print pdf_name
-                #print hmm
-                #exit(1)
+            if parsed_pdf != pdf_name:
+                print parsed_pdf
+                print pdf_name
+                print hmm
+                exit(1)
 
 if __name__ == '__main__':
     run_test()

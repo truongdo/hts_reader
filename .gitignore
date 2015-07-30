@@ -62,3 +62,103 @@ docs/_build/
 target/
 examples/
 hts_reader/bak/
+*.swo
+*.swp
+from __future__ import division
+from pylab import linspace, meshgrid, arange, imshow, show, zeros, asarray
+from time import time
+
+# a function in parallel is easy
+def parallel_function(f):
+    def easy_parallize(f, sequence):
+        # I didn't see gains with .dummy; you might
+        from multiprocessing import Pool
+        pool = Pool(processes=8)
+        #from multiprocessing.dummy import Pool
+        #pool = Pool(16)
+
+        # f is given sequence. guaranteed to be in order
+        result = pool.map(f, sequence)
+        cleaned = [x for x in result if not x is None]
+        cleaned = asarray(cleaned)
+        # not optimal but safe
+        pool.close()
+        pool.join()
+        return cleaned
+    from functools import partial
+    # this assumes f has one argument, fairly easy with Python's global scope
+    return partial(easy_parallize, f)
+
+# how it should be done, but doesn't give iteration results
+def mandel_numpy():
+    N = 100
+    i = linspace(-2, 1, num=N)
+    x, y = meshgrid(i, i)
+    z = x + y*1j
+    for i in arange(50):
+        z = pow(z, 2) + x+y*1j
+    imshow(abs(z))
+    show()
+
+# test one pixel
+def mandel_pixel(x, y):
+    limit = 100
+    z = x + y*1j
+    for i in arange(50):
+        z = pow(z, 2) + (x+y*1j)
+        if abs(z) > limit:
+            #m[argwhere(y_arr == y),  argwhere(x_arr == x)] = i
+            #m[argwhere(y_arr == y),  x] = i
+            return i
+            break
+    return 0
+
+from __future__ import division
+from pylab import linspace, meshgrid, arange, imshow, show, zeros, asarray
+from time import time
+
+# a function in parallel is easy
+def parallel_function(f):
+    def easy_parallize(f, sequence):
+        # I didn't see gains with .dummy; you might
+        from multiprocessing import Pool
+        pool = Pool(processes=8)
+        #from multiprocessing.dummy import Pool
+        #pool = Pool(16)
+
+        # f is given sequence. guaranteed to be in order
+        result = pool.map(f, sequence)
+        cleaned = [x for x in result if not x is None]
+        cleaned = asarray(cleaned)
+        # not optimal but safe
+        pool.close()
+        pool.join()
+        return cleaned
+    from functools import partial
+    # this assumes f has one argument, fairly easy with Python's global scope
+    return partial(easy_parallize, f)
+
+# how it should be done, but doesn't give iteration results
+def mandel_numpy():
+    N = 100
+    i = linspace(-2, 1, num=N)
+    x, y = meshgrid(i, i)
+    z = x + y*1j
+    for i in arange(50):
+        z = pow(z, 2) + x+y*1j
+    imshow(abs(z))
+    show()
+
+# test one pixel
+def mandel_pixel(x, y):
+    limit = 100
+    z = x + y*1j
+    for i in arange(50):
+        z = pow(z, 2) + (x+y*1j)
+        if abs(z) > limit:
+            #m[argwhere(y_arr == y),  argwhere(x_arr == x)] = i
+            #m[argwhere(y_arr == y),  x] = i
+            return i
+            break
+    return 0
+

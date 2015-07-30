@@ -1,6 +1,10 @@
 import re
 from collections import OrderedDict
-from hts_reader import h_label
+import multiprocessing
+from pylab import asarray
+import itertools
+
+#from hts_reader import h_label
 
 
 class Question:
@@ -184,19 +188,48 @@ def get_answer(ctx, qslist):
     return answer
 
 
+def match_pat(pat, ctx):
+    match = pat.search(ctx)
+    if match:
+        return True
+
+    return False
+
+
+def match_pat_star(a_b):
+    """Convert `f([1,2])` to `f(1,2)` call."""
+    return match_pat(*a_b)
+
+
+# a function in parallel is easy
+def parallel_attribute(f):
+    def easy_parallize(f, sequence):
+        # I didn't see gains with .dummy; you might
+        from multiprocessing import Pool
+        pool = Pool(processes=8)
+        #from multiprocessing.dummy import Pool
+        #pool = Pool(16)
+
+        # f is given sequence. guaranteed to be in order
+        result = pool.map(f, sequence)
+        cleaned = [x for x in result if not x is None]
+        cleaned = asarray(cleaned)
+        # not optimal but safe
+        pool.close()
+        pool.join()
+        return cleaned
+    from functools import partial
+    # this assumes f has one argument, fairly easy with Python's global scope
+    return partial(easy_parallize, f)
+
+
 def get_single_answer(ctx, question):
     pat_list = question.patterns
+    #match_pat_star.parallel = parallel_attribute(match_pat_star)
+    #result = match_pat_star.parallel(itertools.izip(pat_list, itertools.repeat(ctx)))
+    #print result
     for pat in pat_list:
-        regex_pattern = pat.replace("*", ".*").replace("\\", "\\\\").replace("+", "\+").replace("^", "\^").replace('$', '\$').replace("|", "\|").replace("?", ".")
-
-        if not regex_tail.search(regex_pattern):
-            regex_pattern += "$"
-
-        if not regex_head.search(regex_pattern):
-            regex_pattern = "^" + regex_pattern
-
-        match = re.search(regex_pattern, ctx)
-        if match:
+        if match_pat(pat, ctx):
             return True
     return False
 

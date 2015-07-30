@@ -16,9 +16,11 @@ import os
 import tree_lex
 from tree_structure import Tree, get_answer
 import tree_parser
-
+import re
 
 logger = logging.getLogger(__name__)
+regex_tail = re.compile("\.\*$")
+regex_head = re.compile("^\.\*")
 
 
 def load_tree(fn_tree):
@@ -59,6 +61,17 @@ class DecisionTree:
                     stream_id = int(stream_id)
                     self.trees[(state_id, stream_id)] = m
             else:
+                regex_pat = []
+                for pat in m.patterns:
+                    regex_pattern = pat.replace("*", ".*").replace("\\", "\\\\").replace("+", "\+").replace("^", "\^").replace('$', '\$').replace("|", "\|").replace("?", ".")
+                    if not regex_tail.search(regex_pattern):
+                        regex_pattern += "$"
+                    if not regex_head.search(regex_pattern):
+                        regex_pattern = "^" + regex_pattern
+
+                    regex_pat.append(re.compile(regex_pattern))
+
+                m.patterns = regex_pat
                 self.qs_list[type][m.name] = m
 
     def parse(self, ctx, sid=None, stid=None, type="mgc"):
