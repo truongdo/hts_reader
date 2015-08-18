@@ -89,26 +89,28 @@ class DecisionTree:
         # answer = get_answer(ctx, self.qs_list[type])
 
         if type == "dur":
-            if (sid, -1) in cache:
-                if ctx in cache[(sid, -1)]:
+            cache_id = str(sid) + "-" + "-1"
+            if cache_id in cache:
+                if ctx in cache[cache_id]:
                     logger.info("return cached")
-                    return cache[(sid, -1)][ctx]
+                    return cache[cache_id][ctx]
                 else:
                     raise Exception("cache has key " + str(sid) + "-" + str(stid) + ". But no model found. Some bugs exits")
             else:
                 model = self.trees[(sid, -1)].parse(ctx, self.qs_list[type])
-                cache[(sid, -1)] = {ctx: model}
+                cache[cache_id] = {ctx: model}
                 return model
         else:
-            if (sid, stid) in cache:
+            cache_id = str(sid) + "-" + str(stid)
+            if cache_id in cache:
                 if ctx in cache:
                     logger.info("return cached")
-                    return cache[(sid, stid)][ctx]
+                    return cache[cache_id][ctx]
                 else:
                     raise Exception("cache has key " + str(sid) + "-" + str(stid) + ". But no model found. Some bugs exits")
             else:
                 model = self.trees[(sid, stid)].parse(ctx, self.qs_list[type])
-                cache[(sid, stid)] = {ctx: model}
+                cache[cache_id] = {ctx: model}
                 return model
 
     def parse_has_answer(self, ctx, answer, sid=None, stid=None, type="mgc"):
