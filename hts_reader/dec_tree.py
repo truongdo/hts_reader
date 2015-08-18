@@ -95,9 +95,10 @@ class DecisionTree:
                     logger.info("return cached")
                     return cache[cache_id][ctx]
                     # raise Exception("cache has key " + str(sid) + "-" + str(stid) + ":" + ctx + ". But no model found. Some bugs exits")
-            # else:
+            else:
+                cache[cache_id] = {}
             model = self.trees[(sid, -1)].parse(ctx, self.qs_list[type])
-            cache[cache_id] = {ctx: model}
+            cache[cache_id][ctx] = model
             return model
         else:
             cache_id = str(sid) + "-" + str(stid)
@@ -107,9 +108,10 @@ class DecisionTree:
                     return cache[cache_id][ctx]
                 # else:
                     # raise Exception("cache has key " + str(sid) + "-" + str(stid) + ". But no model found. Some bugs exits")
-            # else:
+            else:
+                cache[cache_id] = {}
             model = self.trees[(sid, stid)].parse(ctx, self.qs_list[type])
-            cache[cache_id] = {ctx: model}
+            cache[cache_id][ctx] = model
             return model
 
     def parse_has_answer(self, ctx, answer, sid=None, stid=None, type="mgc"):
