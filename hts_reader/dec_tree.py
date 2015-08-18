@@ -74,7 +74,7 @@ class DecisionTree:
                 m.patterns = regex_pat
                 self.qs_list[type][m.name] = m
 
-    def parse(self, ctx, sid=None, stid=None, type="mgc"):
+    def parse(self, ctx, sid=None, stid=None, type="mgc", cache=None):
         """
         Find model for ctx with state id and stream id
         Args:
@@ -86,11 +86,28 @@ class DecisionTree:
 
         assert sid is not None
         assert stid is not None
-        #answer = get_answer(ctx, self.qs_list[type])
+        # answer = get_answer(ctx, self.qs_list[type])
+
         if type == "dur":
-            return self.trees[(sid, -1)].parse(ctx, self.qs_list[type])
+            if (sid, -1) in cache:
+                if ctx in cache[(sid, -1)]:
+                    return cache[(sid, -1)][ctx]
+                else:
+                    raise Exception("cache has key " + str(sid) + "-" + str(stid) + ". But no model found. Some bugs exits")
+            else:
+                model = self.trees[(sid, -1)].parse(ctx, self.qs_list[type])
+                cache[(sid, -1)] = {ctx: model}
+                return model
         else:
-            return self.trees[(sid, stid)].parse(ctx, self.qs_list[type])
+            if (sid, stid) in cache:
+                if ctx in cache:
+                    return cache[(sid, stid)][ctx]
+                else:
+                    raise Exception("cache has key " + str(sid) + "-" + str(stid) + ". But no model found. Some bugs exits")
+            else:
+                model = self.trees[(sid, stid)].parse(ctx, self.qs_list[type])
+                cache[(sid, stid)] = {ctx: model}
+                return model
 
     def parse_has_answer(self, ctx, answer, sid=None, stid=None, type="mgc"):
         """

@@ -3,6 +3,7 @@ from collections import OrderedDict
 import multiprocessing
 from pylab import asarray
 import itertools
+import shelve
 
 #from hts_reader import h_label
 
@@ -272,13 +273,13 @@ class Tree:
         if node is None:    # Start from root
             node = self.root
 
-        #print "==============-----"
+        # print "==============-----"
         qs_name = node.GetPattern()
 
         answer = get_single_answer(ctx, qs_list[qs_name])
-        #print "ask", qs_name, qs_list[qs_name].patterns
-        #print ctx
-        #print "answer:", answer
+        # print "ask", qs_name, qs_list[qs_name].patterns
+        # print ctx
+        # print "answer:", answer
 
         if answer:  # if yes
             yes_node = node.GetYesNode()
