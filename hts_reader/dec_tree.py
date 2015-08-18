@@ -92,7 +92,6 @@ class DecisionTree:
             cache_id = str(sid) + "-" + "-1"
             if cache_id in cache:
                 if ctx in cache[cache_id]:
-                    logger.info("return cached")
                     return cache[cache_id][ctx]
                     # raise Exception("cache has key " + str(sid) + "-" + str(stid) + ":" + ctx + ". But no model found. Some bugs exits")
             else:
@@ -104,7 +103,6 @@ class DecisionTree:
             cache_id = str(sid) + "-" + str(stid)
             if cache_id in cache:
                 if ctx in cache:
-                    logger.info("return cached")
                     return cache[cache_id][ctx]
                 # else:
                     # raise Exception("cache has key " + str(sid) + "-" + str(stid) + ". But no model found. Some bugs exits")
