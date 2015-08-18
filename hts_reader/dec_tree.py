@@ -91,6 +91,7 @@ class DecisionTree:
         if type == "dur":
             if (sid, -1) in cache:
                 if ctx in cache[(sid, -1)]:
+                    logger.info("return cached")
                     return cache[(sid, -1)][ctx]
                 else:
                     raise Exception("cache has key " + str(sid) + "-" + str(stid) + ". But no model found. Some bugs exits")
@@ -101,6 +102,7 @@ class DecisionTree:
         else:
             if (sid, stid) in cache:
                 if ctx in cache:
+                    logger.info("return cached")
                     return cache[(sid, stid)][ctx]
                 else:
                     raise Exception("cache has key " + str(sid) + "-" + str(stid) + ". But no model found. Some bugs exits")
