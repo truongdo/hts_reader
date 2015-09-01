@@ -1,7 +1,7 @@
 import re
 from collections import OrderedDict
 import multiprocessing
-from pylab import asarray
+# from pylab import asarray
 import itertools
 import shelve
 
